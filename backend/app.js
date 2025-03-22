@@ -14,10 +14,24 @@ app.use(express.json()); // Ensures request bodies are parsed as JSON
 app.use(express.urlencoded({ extended: true })); // Parses URL-encoded bodies
 
 // ✅ CORS Configuration
+const allowedOrigins = [
+  'http://localhost:3000', // Development
+  'https://expense-tracker-mu-teal.vercel.app' // Production 
+];
+
 app.use(cors({
-  origin: 'http://localhost:3000', // Adjust based on frontend URL
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
+
+
+
 
 // ✅ Set Default Content-Type for All Responses
 app.use((req, res, next) => {
