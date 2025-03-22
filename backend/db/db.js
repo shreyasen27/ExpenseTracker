@@ -4,11 +4,10 @@ const db = async () => {
   try {
     mongoose.set("strictQuery", false);
 
-    await mongoose.connect(process.env.MONGO_URI, {
+    const dbConnection = await mongoose.connect(process.env.MONGO_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      keepAlive: true, // Keeps the connection alive
-      serverSelectionTimeoutMS: 10000, // Wait 10s before timing out
+      serverSelectionTimeoutMS: 10000, // Timeout after 10s if no server response
       socketTimeoutMS: 60000, // Close sockets after 60s of inactivity
       minPoolSize: 10, // Minimum 10 active connections
       maxPoolSize: 100, // Allow up to 100 connections
@@ -21,28 +20,26 @@ const db = async () => {
     });
 
     mongoose.connection.on("disconnected", () => {
-      console.warn("⚠️ MongoDB Disconnected. Reconnecting...");
+      console.warn("⚠️ MongoDB Disconnected. Attempting Reconnect...");
       reconnectDB();
     });
 
+    return dbConnection;
   } catch (error) {
     console.error("❌ Initial DB Connection Error:", error);
-    setTimeout(db, 5000); // Retry after 5s
+    setTimeout(db, 5000); // Retry after 5 seconds
   }
 };
 
-// Auto-reconnect function
+// 🔄 **Auto-Reconnect Function**
 const reconnectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-      keepAlive: true,
-    });
-    console.log("🔄 MongoDB Reconnected");
+    console.log("🔄 Reconnecting to MongoDB...");
+    await mongoose.disconnect(); // Ensure clean reconnection
+    await db();
   } catch (error) {
     console.error("❌ MongoDB Reconnection Failed:", error);
-    setTimeout(reconnectDB, 5000); // Retry after 5s
+    setTimeout(reconnectDB, 5000); // Retry after 5 seconds
   }
 };
 
