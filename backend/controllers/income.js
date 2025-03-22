@@ -2,9 +2,10 @@ const IncomeSchema= require("../models/IncomeModel")
 
 
 exports.addIncome = async (req, res) => {
+    console.log("Incoming data:",req.body);
     const {title, amount, category, description, date}  = req.body
 
-    const income = IncomeSchema({
+    const income = new IncomeSchema({
         title,
         amount,
         category,
@@ -23,7 +24,7 @@ exports.addIncome = async (req, res) => {
         await income.save()
         res.status(200).json({message: 'Income Added'})
     } catch (error) {
-        res.status(500).json({message: 'Server Error'})
+        res.status(500).json({message: 'Server Error',error:error.message})
     }
 
     console.log(income)
@@ -45,6 +46,7 @@ exports.deleteIncome = async (req, res) =>{
             res.status(200).json({message: 'Income Deleted'})
         })
         .catch((err) =>{
-            res.status(500).json({message: 'Server Error'})
+            console.error("error adding income", err);
+            res.status(500).json({message: 'Server Error',error:err.message})
         })
 }

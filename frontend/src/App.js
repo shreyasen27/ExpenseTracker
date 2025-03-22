@@ -1,67 +1,87 @@
-import React, {useState, useMemo} from 'react'
+import React, { useEffect, useState, useMemo } from "react";
 import styled from "styled-components";
-import bg from './img/bg.png'
-import {MainLayout} from './styles/Layouts'
-import Orb from './Components/Orb/Orb'
-import Navigation from './Components/Navigation/Navigation'
-import Dashboard from './Components/Dashboard/Dashboard';
-import Income from './Components/Income/Income'
-import Expenses from './Components/Expenses/Expenses';
-import { useGlobalContext } from './context/globalContext';
+import bg from "./img/bg.png";
+import { MainLayout } from "./styles/Layouts";
+import Orb from "./Components/Orb/Orb";
+import Navigation from "./Components/Navigation/Navigation";
+import Dashboard from "./Components/Dashboard/Dashboard";
+import Income from "./Components/Income/Income";
+import Expenses from "./Components/Expenses/Expenses";
+import AuthPage from "./pages/AuthPage";  // ✅ Import AuthPage
+import { useGlobalContext } from "./context/globalContext.js";
+import axios from "axios";
 
 function App() {
-  const [active, setActive] = useState(1)
+  const { isAuthenticated, setIsAuthenticated, logout, setUser } = useGlobalContext();
+  const [active, setActive] = useState(1);
+  const [loading, setLoading] = useState(true);
 
-  const global = useGlobalContext()
-  console.log(global);
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const res = await axios.get("http://localhost:5000/api/v1/user/me", {
+          withCredentials: true,
+        });
+        if (res.data) {
+          setIsAuthenticated(true);
+          setUser(res.data);
+        } else {
+          setIsAuthenticated(false);
+        }
+      } catch (err) {
+        console.error("❌ Authentication Error:", err);
+        setIsAuthenticated(false);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const displayData = () => {
-    switch(active){
-      case 1:
-        return <Dashboard />
-      case 2:
-        return <Dashboard />
-      case 3:
-        return <Income />
-      case 4: 
-        return <Expenses />
-      default: 
-        return <Dashboard />
-    }
+    checkAuth();
+  }, [setIsAuthenticated, setUser]);
+
+  const orbMemo = useMemo(() => <Orb />, []);
+
+  if (loading) {
+    return <LoadingScreen>Loading...</LoadingScreen>;
   }
 
-  const orbMemo = useMemo(() => {
-    return <Orb />
-  },[])
-
   return (
-    <AppStyled bg={bg} className="App">
+    <AppStyled bg={bg}>
       {orbMemo}
-      <MainLayout>
-        <Navigation active={active} setActive={setActive} />
-        <main>
-          {displayData()}
-        </main>
-      </MainLayout>
+
+      {!isAuthenticated ? (
+        <AuthPage setIsAuthenticated={setIsAuthenticated} />
+      ) : (
+        <MainLayout>
+          <Navigation
+            active={active}
+            setActive={setActive}
+            setIsAuthenticated={setIsAuthenticated}
+            logout={logout}
+          />
+          <main>
+            {active === 1 ? <Dashboard /> : active === 3 ? <Income /> : <Expenses />}
+          </main>
+        </MainLayout>
+      )}
     </AppStyled>
   );
 }
 
 const AppStyled = styled.div`
   height: 100vh;
-  background-image: url(${props => props.bg});
+  background-image: url(${(props) => props.bg});
   position: relative;
-  main{
-    flex: 1;
-    background: rgba(252, 246, 249, 0.78);
-    border: 3px solid #FFFFFF;
-    backdrop-filter: blur(4.5px);
-    border-radius: 32px;
-    overflow-x: hidden;
-    &::-webkit-scrollbar{
-      width: 0;
-    }
-  }
+  overflow: hidden;
+`;
+
+const LoadingScreen = styled.div`
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: bold;
 `;
 
 export default App;

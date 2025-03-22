@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
-import axios from 'axios';
+import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/v1/";
+const BASE_URL = "http://localhost:5000/api/v1/transactions/";
 
 const GlobalContext = React.createContext();
 
@@ -9,103 +9,144 @@ export const GlobalProvider = ({ children }) => {
   const [incomes, setIncomes] = useState([]);
   const [expenses, setExpenses] = useState([]);
   const [error, setError] = useState(null);
+  const [user,setUser]=useState(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(
+    !!localStorage.getItem("user")
+  );
 
-  // Calculate incomes
+  // ✅ Fetch data on mount if authenticated
+  useEffect(() => {
+    if (isAuthenticated) {
+      getIncomes();
+      getExpenses();
+    }
+  }, [isAuthenticated]);
+
+  // ✅ Add Income
   const addIncome = async (income) => {
     try {
-      const response = await axios.post(`${BASE_URL}add-income`, income);
+      const response = await axios.post(`${BASE_URL}add-income`, income, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("Income Added:", response.data);
       getIncomes();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error adding income');
+      console.error("Add Income Error:", err.response);
+      setError(err.response?.data?.message || "Error adding income");
     }
   };
 
+  // ✅ Fetch Incomes
   const getIncomes = async () => {
     try {
       const response = await axios.get(`${BASE_URL}get-incomes`);
+      console.log("Fetched Incomes:", response.data);
       setIncomes(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error fetching incomes');
+      console.error("Fetch Income Error:", err.response);
+      setError(err.response?.data?.message || "Error fetching incomes");
     }
   };
 
+  // ✅ Delete Income
   const deleteIncome = async (id) => {
     try {
-      const res = await axios.delete(`${BASE_URL}delete-income/${id}`);
+      await axios.delete(`${BASE_URL}delete-income/${id}`);
       getIncomes();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error deleting income');
+      console.error("Delete Income Error:", err.response);
+      setError(err.response?.data?.message || "Error deleting income");
     }
   };
 
-  const totalIncome = () => {
-    return incomes.reduce((total, income) => total + income.amount, 0);
-  };
+  // ✅ Total Income
+  const totalIncome = () =>
+    incomes.reduce((total, income) => total + income.amount, 0);
 
-  // Calculate expenses
+  // ✅ Add Expense
   const addExpense = async (expense) => {
     try {
-      const response = await axios.post(`${BASE_URL}add-expense`, expense);
+      const response = await axios.post(`${BASE_URL}add-expense`, expense, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("Expense Added:", response.data);
       getExpenses();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error adding expense');
+      console.error("Add Expense Error:", err.response);
+      setError(err.response?.data?.message || "Error adding expense");
     }
   };
 
+  // ✅ Fetch Expenses
   const getExpenses = async () => {
     try {
       const response = await axios.get(`${BASE_URL}get-expenses`);
+      console.log("Fetched Expenses:", response.data);
       setExpenses(response.data);
     } catch (err) {
-      setError(err.response?.data?.message || 'Error fetching expenses');
+      console.error("Fetch Expense Error:", err.response);
+      setError(err.response?.data?.message || "Error fetching expenses");
     }
   };
 
+  // ✅ Delete Expense
   const deleteExpense = async (id) => {
     try {
-      const res = await axios.delete(`${BASE_URL}delete-expense/${id}`);
+      await axios.delete(`${BASE_URL}delete-expense/${id}`);
       getExpenses();
     } catch (err) {
-      setError(err.response?.data?.message || 'Error deleting expense');
+      console.error("Delete Expense Error:", err.response);
+      setError(err.response?.data?.message || "Error deleting expense");
     }
   };
 
-  const totalExpenses = () => {
-    return expenses.reduce((total, expense) => total + expense.amount, 0);
-  };
+  // ✅ Total Expenses
+  const totalExpenses = () =>
+    expenses.reduce((total, expense) => total + expense.amount, 0);
 
-  const totalBalance = () => {
-    return totalIncome() - totalExpenses();
-  };
+  // ✅ Total Balance
+  const totalBalance = () => totalIncome() - totalExpenses();
 
+  // ✅ Recent Transactions
   const transactionHistory = () => {
     const history = [...incomes, ...expenses];
     history.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     return history.slice(0, 3);
   };
 
+  // ✅ Logout function
+  const logout = () => {
+    localStorage.removeItem("user");
+    setIsAuthenticated(false);
+  };
+
   return (
-    <GlobalContext.Provider value={{
-      addIncome,
-      getIncomes,
-      incomes,
-      deleteIncome,
-      expenses,
-      totalIncome,
-      addExpense,
-      getExpenses,
-      deleteExpense,
-      totalExpenses,
-      totalBalance,
-      transactionHistory,
-      error,
-      setError
-    }}>
+    <GlobalContext.Provider
+      value={{
+        addIncome,
+        user,
+        setUser,
+        getIncomes,
+        incomes,
+        deleteIncome,
+        expenses,
+        totalIncome,
+        addExpense,
+        getExpenses,
+        deleteExpense,
+        totalExpenses,
+        totalBalance,
+        transactionHistory,
+        error,
+        setError,
+        isAuthenticated,
+        setIsAuthenticated,
+        logout,
+      }}
+    >
       {children}
     </GlobalContext.Provider>
   );
 };
 
-export const useGlobalContext = () => {
-  return useContext(GlobalContext);
-};
+export const useGlobalContext = () => useContext(GlobalContext);

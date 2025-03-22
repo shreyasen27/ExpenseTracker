@@ -36,7 +36,7 @@ const IncomeSchema=new mongoose.Schema({
     {
         type:String,
         required:true,
-        maxLength:20,
+        maxLength:200,
         trim:true
     },
 },{timestamps:true})

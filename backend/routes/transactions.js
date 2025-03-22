@@ -11,4 +11,4 @@ router.post('/add-income', addIncome)
     .get('/get-expenses', getExpenses)
     .delete('/delete-expense/:id', deleteExpense)
 
-module.exports = router
+module.exports = {router}
