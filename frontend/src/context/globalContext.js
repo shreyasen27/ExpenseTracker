@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import axios from "axios";
 
-const BASE_URL = "http://localhost:5000/api/v1/transactions/";
+const BASE_URL = "http://localhost:5000" || process.env.REACT_APP_API_URL;
 
 const GlobalContext = React.createContext();
 
@@ -25,7 +25,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Add Income
   const addIncome = async (income) => {
     try {
-      const response = await axios.post(`${BASE_URL}add-income`, income, {
+      const response = await axios.post(`${BASE_URL}/api/v1/transactions/add-income`, income, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Income Added:", response.data);
@@ -39,7 +39,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Fetch Incomes
   const getIncomes = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}get-incomes`);
+      const response = await axios.get(`${BASE_URL}/api/v1/transactions/get-incomes`);
       console.log("Fetched Incomes:", response.data);
       setIncomes(response.data);
     } catch (err) {
@@ -51,7 +51,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Delete Income
   const deleteIncome = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}delete-income/${id}`);
+      await axios.delete(`${BASE_URL}/api/v1/transactions/delete-income/${id}`);
       getIncomes();
     } catch (err) {
       console.error("Delete Income Error:", err.response);
@@ -66,7 +66,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Add Expense
   const addExpense = async (expense) => {
     try {
-      const response = await axios.post(`${BASE_URL}add-expense`, expense, {
+      const response = await axios.post(`${BASE_URL}/api/v1/transactions/add-expense`, expense, {
         headers: { "Content-Type": "application/json" },
       });
       console.log("Expense Added:", response.data);
@@ -80,7 +80,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Fetch Expenses
   const getExpenses = async () => {
     try {
-      const response = await axios.get(`${BASE_URL}get-expenses`);
+      const response = await axios.get(`${BASE_URL}/api/v1/transactions/get-expenses`);
       console.log("Fetched Expenses:", response.data);
       setExpenses(response.data);
     } catch (err) {
@@ -92,7 +92,7 @@ export const GlobalProvider = ({ children }) => {
   // ✅ Delete Expense
   const deleteExpense = async (id) => {
     try {
-      await axios.delete(`${BASE_URL}delete-expense/${id}`);
+      await axios.delete(`${BASE_URL}/api/v1/transactions/delete-expense/${id}`);
       getExpenses();
     } catch (err) {
       console.error("Delete Expense Error:", err.response);
