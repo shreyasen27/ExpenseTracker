@@ -20,14 +20,14 @@ const RegisterForm = ({ setIsAuthenticated }) => {
       [e.target.name]: e.target.value,
     }));
   };
-
+  const API_URL=process.env.REACT_APP_API_URL;
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
     try {
       const response = await axios.post(
-        'http://localhost:5000/api/v1/auth/register',
+        '${API_URL}/api/v1/auth/register',
         formData,
         { withCredentials: true }
       );

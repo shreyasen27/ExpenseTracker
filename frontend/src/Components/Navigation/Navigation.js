@@ -9,7 +9,7 @@ import { menuItems } from "../../utils/menuItems";
 function Navigation({ active, setActive, setIsAuthenticated }) {
   const [user, setUser] = useState(null);
   const [error, setError] = useState(null);
-
+  const API_URL=process.env.REACT_APP_API_URL;
   useEffect(() => {
     const fetchUser = async () => {
       try {
@@ -18,7 +18,7 @@ function Navigation({ active, setActive, setIsAuthenticated }) {
         // Clear localStorage before fetching new data
         localStorage.removeItem("user");
   
-        const response = await fetch("http://localhost:5000/api/v1/user/me", {
+        const response = await fetch("${API_URL}/api/v1/user/me", {
           credentials: "include",
         });
   

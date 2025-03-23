@@ -7,7 +7,7 @@ const LoginForm = ({ setIsAuthenticated }) => {
     email: "",
     password: "",
   });
-
+ const API_URL=process.env.REACT_APP_API_URL;
   const [error, setError] = useState("");
 
   const handleChange = (e) => {
@@ -20,7 +20,7 @@ const LoginForm = ({ setIsAuthenticated }) => {
 
     try {
       const response = await axios.post(
-        "http://localhost:5000/api/v1/auth/login",
+        "${API_URL}/api/v1/auth/login",
         formData,
         { withCredentials: true }
       );
