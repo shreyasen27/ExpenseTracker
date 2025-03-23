@@ -11,15 +11,16 @@ import AuthPage from "./pages/AuthPage";  // ✅ Import AuthPage
 import { useGlobalContext } from "./context/globalContext.js";
 import axios from "axios";
 
+const API_URL=process.env.REACT_APP_API_URL;
 function App() {
   const { isAuthenticated, setIsAuthenticated, logout, setUser } = useGlobalContext();
   const [active, setActive] = useState(1);
   const [loading, setLoading] = useState(true);
-
+ 
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const res = await axios.get("http://localhost:5000/api/v1/user/me", {
+      try {  
+        const res = await axios.get("${API_URL}/api/v1/user/me", {
           withCredentials: true,
         });
         if (res.data) {

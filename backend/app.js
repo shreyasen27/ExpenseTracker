@@ -16,7 +16,7 @@ app.use(express.urlencoded({ extended: true })); // Parses URL-encoded bodies
 // ✅ CORS Configuration
 const allowedOrigins = [
   'http://localhost:3000', // Development
-  'https://expense-tracker-mu-teal.vercel.app' // Production 
+ process.env.BASE_URL // Production 
 ];
 
 app.use(cors({
